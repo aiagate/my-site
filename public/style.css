@@ -19,3 +19,55 @@ pre {
 img {
 	max-width: 100%;
 }
+
+.site-header {
+	background: #1f2937;
+	color: #fff;
+}
+
+.site-header__inner {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 12px 20px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.site-header a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.site-header__logo {
+	font-weight: 700;
+}
+
+.site-header__nav {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+
+.site-header__github {
+	display: inline-flex;
+	padding: 2px;
+}
+
+.site-header__github svg {
+	width: 20px;
+	height: 20px;
+	fill: currentColor;
+}
+
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}

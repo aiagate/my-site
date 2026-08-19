@@ -22,6 +22,7 @@ const CONTENT_DIR = "content/blog";
 const OUTPUT_DIR = "dist";
 const BLOG_OUTPUT_DIR = "dist/blog";
 const articleTemplate = fs.readFileSync("templates/article.html", "utf8");
+const headerTemplate = fs.readFileSync("templates/header.html", "utf8");
 const indexTemplate = fs.readFileSync("templates/index.html", "utf8");
 
 function cleanOutput() {
@@ -98,6 +99,7 @@ async function buildArticle(post: Post): Promise<void> {
 	const content = await marked(post.content);
 
 	const html = articleTemplate
+		.replace("{{ siteHeader }}", headerTemplate)
 		.replaceAll("{{ title }}", post.title ?? "")
 		.replace("{{ markdownPath }}", getPostMarkdownPath(post))
 		.replaceAll(
@@ -130,7 +132,9 @@ function buildIndex(posts: Post[]): void {
 		.map(renderPostListItem)
 		.join("");
 
-	const html = indexTemplate.replace("{{ posts }}", postsHtml);
+	const html = indexTemplate
+		.replace("{{ siteHeader }}", headerTemplate)
+		.replace("{{ posts }}", postsHtml);
 
 	fs.writeFileSync(path.join(OUTPUT_DIR, "index.html"), html);
 }
