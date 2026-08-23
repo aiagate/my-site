@@ -22,7 +22,22 @@
         </header>
 
         {{ content }}
+
+        <section
+          class="like"
+          data-like-slug="{{ slug }}"
+          aria-label="この記事にいいね"
+        >
+          <button class="like__button" type="button">
+            ♡ いいね
+            <span class="like__count" data-like-count aria-live="polite"
+              >—</span
+            >
+          </button>
+          <p class="like__message" data-like-message aria-live="polite"></p>
+        </section>
       </article>
     </main>
+    <script type="module" src="/likes.js"></script>
   </body>
 </html>

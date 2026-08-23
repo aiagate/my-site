@@ -100,6 +100,7 @@ async function buildArticle(post: Post): Promise<void> {
 
 	const html = articleTemplate
 		.replace("{{ siteHeader }}", headerTemplate)
+		.replace("{{ slug }}", post.slug)
 		.replaceAll("{{ title }}", post.title ?? "")
 		.replace("{{ markdownPath }}", getPostMarkdownPath(post))
 		.replaceAll(
@@ -137,6 +138,13 @@ function buildIndex(posts: Post[]): void {
 		.replace("{{ posts }}", postsHtml);
 
 	fs.writeFileSync(path.join(OUTPUT_DIR, "index.html"), html);
+}
+
+function buildPostSlugs(posts: Post[]): void {
+	fs.writeFileSync(
+		path.join(OUTPUT_DIR, "post-slugs.json"),
+		`${JSON.stringify(posts.map((post) => post.slug))}\n`,
+	);
 }
 
 function buildLlmsTxt(posts: Post[]): void {
@@ -234,6 +242,7 @@ async function main() {
 	}
 
 	buildIndex(posts);
+	buildPostSlugs(posts);
 	buildLlmsTxt(posts);
 	buildSitemap(getSitemapEntries(posts));
 	copyPublic();

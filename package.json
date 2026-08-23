@@ -5,9 +5,13 @@
 	"scripts": {
 		"build": "node tools/build.ts",
 		"new:post": "node tools/new-post.ts",
+		"db:create": "wrangler d1 create my-site-likes",
+		"db:migrate": "wrangler d1 migrations apply my-site-likes --remote",
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
+		"test": "pnpm build && vitest run",
+		"test:watch": "pnpm build && vitest",
 		"lint": "biome lint .",
 		"format": "biome format --write .",
 		"check": "biome check .",
@@ -17,12 +21,15 @@
 		"date-fns": "^4.4.0",
 		"date-fns-tz": "^3.2.0",
 		"gray-matter": "^4.0.3",
+		"hono": "^4.13.3",
 		"marked": "^18.0.9",
 		"zod": "^4.4.3",
 		"zod-matter": "^0.1.3"
 	},
 	"devDependencies": {
+		"@cloudflare/vitest-plugin": "^1.0.0",
 		"@biomejs/biome": "2.5.8",
+		"vitest": "^4.1.11",
 		"wrangler": "^4.123.0"
 	}
 }

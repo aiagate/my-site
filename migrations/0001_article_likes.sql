@@ -1,0 +1,4 @@
+CREATE TABLE article_likes (
+  slug TEXT PRIMARY KEY NOT NULL,
+  count INTEGER NOT NULL DEFAULT 0 CHECK (count >= 0)
+) WITHOUT ROWID;

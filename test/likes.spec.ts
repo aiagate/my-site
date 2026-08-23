@@ -1,0 +1,59 @@
+import { exports } from "cloudflare:workers";
+import { describe, expect, it } from "vitest";
+
+const origin = "https://shimae.test";
+
+function like(slug: string, requestOrigin = origin) {
+	return exports.default.fetch(
+		new Request(`${origin}/api/likes/${slug}`, {
+			method: "POST",
+			headers: { Origin: requestOrigin },
+		}),
+	);
+}
+
+function getLikeCount(slug: string) {
+	return exports.default.fetch(new Request(`${origin}/api/likes/${slug}`));
+}
+
+describe("記事いいね API", () => {
+	it("連打ごとに累積数を増やす", async () => {
+		const first = await like("hello");
+		const second = await like("hello");
+
+		expect(first.status).toBe(200);
+		expect(await first.json()).toEqual({ count: 1 });
+		expect(second.status).toBe(200);
+		expect(await second.json()).toEqual({ count: 2 });
+	});
+
+	it("ページ再読み込み用に現在の累積数を返す", async () => {
+		await like("hello");
+		await like("hello");
+
+		const response = await getLikeCount("hello");
+
+		expect(response.status).toBe(200);
+		expect(await response.json()).toEqual({ count: 2 });
+	});
+
+	it("公開されていない記事は更新しない", async () => {
+		const response = await like("not-a-post");
+
+		expect(response.status).toBe(404);
+	});
+
+	it("他Originからの更新を拒否する", async () => {
+		const response = await like("hello", "https://example.test");
+
+		expect(response.status).toBe(403);
+	});
+
+	it("未対応のHTTPメソッドを拒否する", async () => {
+		const response = await exports.default.fetch(
+			new Request(`${origin}/api/likes/hello`, { method: "PUT" }),
+		);
+
+		expect(response.status).toBe(405);
+	});
+});

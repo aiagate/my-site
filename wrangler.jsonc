@@ -2,10 +2,21 @@
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "my-site",
 	"compatibility_date": "2026-08-17",
+	"main": "src/worker.ts",
 	"assets": {
-		// The path to the directory containing the `index.html` file to be served at `/`
-		"directory": "./dist"
+		// The path to the directory containing the `index.html` file to be served at `/`.
+		"directory": "./dist",
+		"binding": "ASSETS"
 	},
+	"d1_databases": [
+		{
+			"binding": "LIKES",
+			"database_name": "my-site-likes",
+			// Replace this with the ID printed by `pnpm db:create` before deploying.
+			"database_id": "00000000-0000-0000-0000-000000000000",
+			"migrations_dir": "migrations"
+		}
+	],
 	"observability": {
 		"enabled": true
 	}
