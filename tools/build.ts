@@ -96,7 +96,7 @@ function getPostSitemapEntry(post: Post): SitemapEntry {
 }
 
 async function buildArticle(post: Post): Promise<void> {
-	const content = await marked(post.content);
+	const content = await marked(post.content, { breaks: true });
 
 	const html = articleTemplate
 		.replace("{{ siteHeader }}", headerTemplate)
