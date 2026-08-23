@@ -16,6 +16,16 @@
 			"migrations_dir": "migrations"
 		}
 	],
+	"ratelimits": [
+		{
+			"name": "LIKE_RATE_LIMIT",
+			"namespace_id": "78001631",
+			"simple": {
+				"limit": 30,
+				"period": 10
+			}
+		}
+	],
 	"observability": {
 		"enabled": true
 	}

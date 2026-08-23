@@ -4,6 +4,7 @@ import { isPublishedPost } from "./published-posts.ts";
 
 export type Env = {
 	ASSETS: Fetcher;
+	LIKE_RATE_LIMIT: RateLimit;
 	LIKES: D1Database;
 };
 
@@ -13,7 +14,7 @@ const app = new Hono<{ Bindings: Env }>();
 function json(
 	c: Context<{ Bindings: Env }>,
 	body: unknown,
-	status: 403 | 404 | 405,
+	status: 403 | 404 | 405 | 429,
 ) {
 	c.header("Cache-Control", "no-store");
 	return c.json(body, status);
@@ -48,6 +49,13 @@ app.post("/api/likes/:slug", async (c) => {
 
 	if (!(await isPublishedSlug(c, slug))) {
 		return json(c, { error: "Article not found" }, 404);
+	}
+
+	const clientIp = c.req.header("CF-Connecting-IP") ?? "unknown";
+	const { success } = await c.env.LIKE_RATE_LIMIT.limit({ key: clientIp });
+
+	if (!success) {
+		return json(c, { error: "Too many requests" }, 429);
 	}
 
 	const count = await incrementLike(c.env.LIKES, slug);

@@ -3,11 +3,17 @@ import { describe, expect, it } from "vitest";
 
 const origin = "https://shimae.test";
 
-function like(slug: string, requestOrigin = origin) {
+function like(slug: string, requestOrigin = origin, clientIp?: string) {
+	const headers = new Headers({ Origin: requestOrigin });
+
+	if (clientIp) {
+		headers.set("CF-Connecting-IP", clientIp);
+	}
+
 	return exports.default.fetch(
 		new Request(`${origin}/api/likes/${slug}`, {
 			method: "POST",
-			headers: { Origin: requestOrigin },
+			headers,
 		}),
 	);
 }
@@ -63,6 +69,22 @@ describe("記事いいね API", () => {
 		const response = await like("hello", "https://example.test");
 
 		expect(response.status).toBe(403);
+	});
+
+	it("同じ送信元からの連打を制限する", async () => {
+		const clientIp = "203.0.113.42";
+
+		for (let attempt = 0; attempt < 30; attempt++) {
+			expect((await like("hello", origin, clientIp)).status).toBe(200);
+		}
+
+		const response = await like("hello", origin, clientIp);
+		const count = await getLikeCount("hello");
+
+		expect(response.status).toBe(429);
+		expect(await response.json()).toEqual({ error: "Too many requests" });
+		expect(count.status).toBe(200);
+		expect(await count.json()).toEqual({ count: 30 });
 	});
 
 	it("未対応のHTTPメソッドを拒否する", async () => {

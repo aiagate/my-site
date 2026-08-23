@@ -49,6 +49,8 @@ pnpm db:migrate
 
 いいねの加算は意図的に非冪等です。通信失敗時にブラウザから自動再試行すると、実際には反映済みだった場合にもさらに1増えるため、自動再試行は行いません。
 
-### 悪用時の操作
+### レート制限
 
-Cloudflare Dashboard で `/api/likes/*` にレート制限ルールを1つ設定します。通常は「同じ送信元から10秒に30回程度」を許可し、超過分には Managed Challenge を使うのが目安です。異常な連打が続く場合は、このルールを厳しくするか、`/api/likes/*` を一時的にブロックします。
+`POST /api/likes/<slug>` は、Cloudflare Workers のRate Limitingバインディングにより、送信元IPごとに10秒間で30回まで受け付けます。超過時はいいねを加算せず、HTTP 429を返します。設定値は [wrangler.jsonc](wrangler.jsonc) の `LIKE_RATE_LIMIT` で管理します。
+
+この制限はCloudflareのデータセンターごとに適用される、緩やかな悪用抑止です。IPアドレスをアプリケーションやD1に保存することはありません。
