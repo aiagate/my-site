@@ -16,6 +16,22 @@ function getLikeCount(slug: string) {
 	return exports.default.fetch(new Request(`${origin}/api/likes/${slug}`));
 }
 
+describe("静的アセット", () => {
+	it("Markdownとllms.txtをUTF-8として配信する", async () => {
+		const [llmsTxt, markdown] = await Promise.all([
+			exports.default.fetch(new Request(`${origin}/llms.txt`)),
+			exports.default.fetch(new Request(`${origin}/blog/hello/index.md`)),
+		]);
+
+		expect(llmsTxt.headers.get("Content-Type")).toBe(
+			"text/plain; charset=utf-8",
+		);
+		expect(markdown.headers.get("Content-Type")).toBe(
+			"text/markdown; charset=utf-8",
+		);
+	});
+});
+
 describe("記事いいね API", () => {
 	it("連打ごとに累積数を増やす", async () => {
 		const first = await like("hello");
