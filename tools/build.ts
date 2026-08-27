@@ -5,6 +5,7 @@ import { formatInTimeZone } from "date-fns-tz";
 import { marked } from "marked";
 import { ZodError, z } from "zod";
 import { parse } from "zod-matter";
+import { escapeHtml, sanitizeMarkdownHtml } from "./html.ts";
 import {
 	SITE_DESCRIPTION,
 	SITE_NAME,
@@ -96,19 +97,21 @@ function getPostSitemapEntry(post: Post): SitemapEntry {
 }
 
 async function buildArticle(post: Post): Promise<void> {
-	const content = await marked(post.content, { breaks: true });
+	const content = sanitizeMarkdownHtml(
+		await marked(post.content, { breaks: true }),
+	);
 
 	const html = articleTemplate
 		.replace("{{ siteHeader }}", headerTemplate)
-		.replace("{{ slug }}", post.slug)
-		.replaceAll("{{ title }}", post.title ?? "")
+		.replace("{{ slug }}", escapeHtml(post.slug))
+		.replaceAll("{{ title }}", escapeHtml(post.title))
 		.replace("{{ markdownPath }}", getPostMarkdownPath(post))
 		.replaceAll(
 			"{{ createdAt }}",
 			formatInTimeZone(post.createdAt, SITE_TIME_ZONE, "yyyy/MM/dd"),
 		)
 		.replaceAll("{{ createdAtIso }}", post.createdAt.toISOString())
-		.replaceAll("{{ description }}", post.description ?? "")
+		.replaceAll("{{ description }}", escapeHtml(post.description))
 		.replace("{{ content }}", content);
 
 	const outputDir = path.join(BLOG_OUTPUT_DIR, post.slug);
@@ -170,7 +173,7 @@ function renderPostListItem(post: Post) {
 	return `
     <li>
       <a href="${getPostPath(post)}">
-        ${post.title}
+        ${escapeHtml(post.title)}
       </a>
 		<time datetime="${post.createdAt.toISOString()}">
 		${formatInTimeZone(post.createdAt, SITE_TIME_ZONE, "yyyy/MM/dd HH:mm")}
