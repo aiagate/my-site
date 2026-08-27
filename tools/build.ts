@@ -96,12 +96,45 @@ function getPostSitemapEntry(post: Post): SitemapEntry {
 	};
 }
 
+function getCanonicalUrl(pathname: string): string {
+	return new URL(pathname, SITE_URL).href;
+}
+
+function renderMetadata(
+	template: string,
+	{
+		canonicalUrl,
+		description,
+		ogType,
+		title,
+	}: {
+		canonicalUrl: string;
+		description: string;
+		ogType: "article" | "website";
+		title: string;
+	},
+): string {
+	return template
+		.replaceAll("{{ canonicalUrl }}", escapeHtml(canonicalUrl))
+		.replaceAll("{{ ogType }}", ogType)
+		.replaceAll("{{ pageDescription }}", escapeHtml(description))
+		.replaceAll("{{ pageTitle }}", escapeHtml(title))
+		.replaceAll("{{ siteName }}", escapeHtml(SITE_NAME));
+}
+
 async function buildArticle(post: Post): Promise<void> {
 	const content = sanitizeMarkdownHtml(
 		await marked(post.content, { breaks: true }),
 	);
+	const canonicalUrl = getCanonicalUrl(getPostPath(post));
+	const pageTitle = `${post.title} | ${SITE_NAME}`;
 
-	const html = articleTemplate
+	const html = renderMetadata(articleTemplate, {
+		canonicalUrl,
+		description: post.description,
+		ogType: "article",
+		title: pageTitle,
+	})
 		.replace("{{ siteHeader }}", headerTemplate)
 		.replace("{{ slug }}", escapeHtml(post.slug))
 		.replaceAll("{{ title }}", escapeHtml(post.title))
@@ -111,7 +144,6 @@ async function buildArticle(post: Post): Promise<void> {
 			formatInTimeZone(post.createdAt, SITE_TIME_ZONE, "yyyy/MM/dd"),
 		)
 		.replaceAll("{{ createdAtIso }}", post.createdAt.toISOString())
-		.replaceAll("{{ description }}", escapeHtml(post.description))
 		.replace("{{ content }}", content);
 
 	const outputDir = path.join(BLOG_OUTPUT_DIR, post.slug);
@@ -136,7 +168,12 @@ function buildIndex(posts: Post[]): void {
 		.map(renderPostListItem)
 		.join("");
 
-	const html = indexTemplate
+	const html = renderMetadata(indexTemplate, {
+		canonicalUrl: getCanonicalUrl("/"),
+		description: SITE_DESCRIPTION,
+		ogType: "website",
+		title: SITE_NAME,
+	})
 		.replace("{{ siteHeader }}", headerTemplate)
 		.replace("{{ posts }}", postsHtml);
 

@@ -4,7 +4,19 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
 
-    <title>shimae.net</title>
+    <title>{{ pageTitle }}</title>
+    <meta name="description" content="{{ pageDescription }}">
+    <link rel="canonical" href="{{ canonicalUrl }}">
+
+    <meta property="og:type" content="{{ ogType }}">
+    <meta property="og:title" content="{{ pageTitle }}">
+    <meta property="og:description" content="{{ pageDescription }}">
+    <meta property="og:url" content="{{ canonicalUrl }}">
+    <meta property="og:site_name" content="{{ siteName }}">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{ pageTitle }}">
+    <meta name="twitter:description" content="{{ pageDescription }}">
 
     <link rel="describedby" href="/llms.txt">
     <link rel="stylesheet" href="./style.css">
