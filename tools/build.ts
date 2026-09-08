@@ -50,13 +50,28 @@ function parseFrontMatter<T extends z.ZodType>(
 }
 
 function loadPosts(): Post[] {
-	return fs
+	const loadedPosts = fs
 		.readdirSync(CONTENT_DIR)
 		.filter((file) => file.endsWith(".md"))
-		.map((file) => loadPost(file));
+		.map((file) => ({ file, post: loadPost(file) }));
+	const filesBySlug = new Map<string, string>();
+
+	for (const { file, post } of loadedPosts) {
+		const previousFile = filesBySlug.get(post.slug);
+
+		if (previousFile) {
+			throw new Error(
+				`記事slugが重複しています: ${post.slug}\n- ${previousFile}\n- ${file}`,
+			);
+		}
+
+		filesBySlug.set(post.slug, file);
+	}
+
+	return loadedPosts.map(({ post }) => post);
 }
 
-function loadPost(file): Post {
+function loadPost(file: string): Post {
 	const filePath = path.join(CONTENT_DIR, file);
 	const fileName = postFilenameSchema.safeParse(file);
 

@@ -4,6 +4,8 @@ Markdownで書いた記事を静的サイトとして公開する個人ブログ
 
 ## 開発
 
+Node.js 22以上とpnpm 11.22.0以上を使います。
+
 ```sh
 pnpm install
 pnpm dev
@@ -16,6 +18,8 @@ pnpm check
 pnpm test
 pnpm build
 ```
+
+`pnpm check`はBiomeによる静的検査とTypeScriptの型検査を実行します。
 
 新しい記事は次のコマンドで作成します。
 

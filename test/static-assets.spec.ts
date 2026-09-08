@@ -4,6 +4,16 @@ import { describe, expect, it } from "vitest";
 const origin = "https://shimae.test";
 
 describe("静的アセット", () => {
+	it("公開記事のslugを重複なくマニフェストに出力する", async () => {
+		const response = await exports.default.fetch(
+			new Request(`${origin}/post-slugs.json`),
+		);
+		const slugs = (await response.json()) as string[];
+
+		expect(response.status).toBe(200);
+		expect(new Set(slugs).size).toBe(slugs.length);
+	});
+
 	it("一覧と記事に発見用のメタデータを出力する", async () => {
 		const [home, article] = await Promise.all([
 			exports.default.fetch(new Request(`${origin}/`)),

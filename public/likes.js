@@ -12,7 +12,10 @@ if (like instanceof HTMLElement) {
 		message instanceof HTMLElement &&
 		slug
 	) {
+		let requestVersion = 0;
+
 		button.addEventListener("click", async () => {
+			const currentVersion = ++requestVersion;
 			button.disabled = true;
 			message.textContent = "";
 
@@ -26,7 +29,9 @@ if (like instanceof HTMLElement) {
 				}
 
 				const body = await response.json();
-				count.textContent = String(body.count);
+				if (currentVersion === requestVersion) {
+					count.textContent = String(body.count);
+				}
 				message.textContent = "いいねしました。";
 			} catch {
 				message.textContent =
@@ -37,6 +42,8 @@ if (like instanceof HTMLElement) {
 		});
 
 		void (async () => {
+			const initialVersion = requestVersion;
+
 			try {
 				const response = await fetch(`/api/likes/${encodeURIComponent(slug)}`);
 
@@ -45,7 +52,9 @@ if (like instanceof HTMLElement) {
 				}
 
 				const body = await response.json();
-				count.textContent = String(body.count);
+				if (initialVersion === requestVersion) {
+					count.textContent = String(body.count);
+				}
 			} catch {
 				// The button remains usable when loading the current count fails.
 			}

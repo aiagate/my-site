@@ -19,6 +19,22 @@ function formatUtcFilenamePrefix(date: Date) {
 	return `${datePart.replaceAll("-", "")}-${timePart.slice(0, 5).replace(":", "")}`;
 }
 
+function findExistingSlug(slug: string): string | undefined {
+	if (!fs.existsSync(CONTENT_DIR)) {
+		return undefined;
+	}
+
+	for (const file of fs.readdirSync(CONTENT_DIR)) {
+		const parsed = postFilenameSchema.safeParse(file);
+
+		if (parsed.success && parsed.data.slug === slug) {
+			return file;
+		}
+	}
+
+	return undefined;
+}
+
 const [slug, ...titleParts] = process.argv.slice(2);
 const input = newPostInputSchema.safeParse({
 	slug,
@@ -36,9 +52,15 @@ if (!input.success) {
 	const fileName = `${prefix}--${input.data.slug}.md`;
 	postFilenameSchema.parse(fileName);
 	const filePath = path.join(CONTENT_DIR, fileName);
+	const existingSlugFile = findExistingSlug(input.data.slug);
 
 	if (fs.existsSync(filePath)) {
 		console.error(`記事がすでに存在します: ${filePath}`);
+		process.exitCode = 1;
+	} else if (existingSlugFile) {
+		console.error(
+			`同じslugの記事がすでに存在します: ${path.join(CONTENT_DIR, existingSlugFile)}`,
+		);
 		process.exitCode = 1;
 	} else {
 		const source = postTemplate

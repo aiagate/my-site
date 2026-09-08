@@ -2,6 +2,11 @@
 	"type": "module",
 	"version": "0.0.0",
 	"private": true,
+	"packageManager": "pnpm@11.22.0",
+	"engines": {
+		"node": ">=22.0.0",
+		"pnpm": ">=11.22.0"
+	},
 	"scripts": {
 		"build": "node tools/build.ts",
 		"new:post": "node tools/new-post.ts",
@@ -14,7 +19,7 @@
 		"test:watch": "pnpm build && vitest",
 		"lint": "biome lint .",
 		"format": "biome format --write .",
-		"check": "biome check .",
+		"check": "biome check . && tsc --noEmit",
 		"check:fix": "biome check --write ."
 	},
 	"dependencies": {
@@ -30,6 +35,10 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.5.8",
 		"@cloudflare/vitest-plugin": "^1.0.0",
+		"@cloudflare/workers-types": "^5.20260811.1",
+		"@types/node": "^22.15.17",
+		"@types/sanitize-html": "^2.16.1",
+		"typescript": "^5.8.3",
 		"vitest": "^4.1.11",
 		"wrangler": "^4.123.0"
 	}
