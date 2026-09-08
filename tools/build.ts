@@ -5,6 +5,7 @@ import { formatInTimeZone } from "date-fns-tz";
 import { marked } from "marked";
 import { ZodError, z } from "zod";
 import { parse } from "zod-matter";
+import { escapeHtml, sanitizeMarkdownHtml } from "./html.ts";
 import {
 	SITE_DESCRIPTION,
 	SITE_NAME,
@@ -49,13 +50,28 @@ function parseFrontMatter<T extends z.ZodType>(
 }
 
 function loadPosts(): Post[] {
-	return fs
+	const loadedPosts = fs
 		.readdirSync(CONTENT_DIR)
 		.filter((file) => file.endsWith(".md"))
-		.map((file) => loadPost(file));
+		.map((file) => ({ file, post: loadPost(file) }));
+	const filesBySlug = new Map<string, string>();
+
+	for (const { file, post } of loadedPosts) {
+		const previousFile = filesBySlug.get(post.slug);
+
+		if (previousFile) {
+			throw new Error(
+				`記事slugが重複しています: ${post.slug}\n- ${previousFile}\n- ${file}`,
+			);
+		}
+
+		filesBySlug.set(post.slug, file);
+	}
+
+	return loadedPosts.map(({ post }) => post);
 }
 
-function loadPost(file): Post {
+function loadPost(file: string): Post {
 	const filePath = path.join(CONTENT_DIR, file);
 	const fileName = postFilenameSchema.safeParse(file);
 
@@ -95,20 +111,54 @@ function getPostSitemapEntry(post: Post): SitemapEntry {
 	};
 }
 
-async function buildArticle(post: Post): Promise<void> {
-	const content = await marked(post.content, { breaks: true });
+function getCanonicalUrl(pathname: string): string {
+	return new URL(pathname, SITE_URL).href;
+}
 
-	const html = articleTemplate
+function renderMetadata(
+	template: string,
+	{
+		canonicalUrl,
+		description,
+		ogType,
+		title,
+	}: {
+		canonicalUrl: string;
+		description: string;
+		ogType: "article" | "website";
+		title: string;
+	},
+): string {
+	return template
+		.replaceAll("{{ canonicalUrl }}", escapeHtml(canonicalUrl))
+		.replaceAll("{{ ogType }}", ogType)
+		.replaceAll("{{ pageDescription }}", escapeHtml(description))
+		.replaceAll("{{ pageTitle }}", escapeHtml(title))
+		.replaceAll("{{ siteName }}", escapeHtml(SITE_NAME));
+}
+
+async function buildArticle(post: Post): Promise<void> {
+	const content = sanitizeMarkdownHtml(
+		await marked(post.content, { breaks: true }),
+	);
+	const canonicalUrl = getCanonicalUrl(getPostPath(post));
+	const pageTitle = `${post.title} | ${SITE_NAME}`;
+
+	const html = renderMetadata(articleTemplate, {
+		canonicalUrl,
+		description: post.description,
+		ogType: "article",
+		title: pageTitle,
+	})
 		.replace("{{ siteHeader }}", headerTemplate)
-		.replace("{{ slug }}", post.slug)
-		.replaceAll("{{ title }}", post.title ?? "")
+		.replace("{{ slug }}", escapeHtml(post.slug))
+		.replaceAll("{{ title }}", escapeHtml(post.title))
 		.replace("{{ markdownPath }}", getPostMarkdownPath(post))
 		.replaceAll(
 			"{{ createdAt }}",
 			formatInTimeZone(post.createdAt, SITE_TIME_ZONE, "yyyy/MM/dd"),
 		)
 		.replaceAll("{{ createdAtIso }}", post.createdAt.toISOString())
-		.replaceAll("{{ description }}", post.description ?? "")
 		.replace("{{ content }}", content);
 
 	const outputDir = path.join(BLOG_OUTPUT_DIR, post.slug);
@@ -133,7 +183,12 @@ function buildIndex(posts: Post[]): void {
 		.map(renderPostListItem)
 		.join("");
 
-	const html = indexTemplate
+	const html = renderMetadata(indexTemplate, {
+		canonicalUrl: getCanonicalUrl("/"),
+		description: SITE_DESCRIPTION,
+		ogType: "website",
+		title: SITE_NAME,
+	})
 		.replace("{{ siteHeader }}", headerTemplate)
 		.replace("{{ posts }}", postsHtml);
 
@@ -170,7 +225,7 @@ function renderPostListItem(post: Post) {
 	return `
     <li>
       <a href="${getPostPath(post)}">
-        ${post.title}
+        ${escapeHtml(post.title)}
       </a>
 		<time datetime="${post.createdAt.toISOString()}">
 		${formatInTimeZone(post.createdAt, SITE_TIME_ZONE, "yyyy/MM/dd HH:mm")}
