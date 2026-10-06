@@ -19,6 +19,40 @@ describe("静的アセット", () => {
 
 		expect(response.status).toBe(200);
 		expect(new Set(slugs).size).toBe(slugs.length);
+		expect(slugs.toSorted()).toEqual([
+			"ai-ronpa-kaikan-driven-development",
+			"hello",
+			"what-role-for-me",
+		]);
+	});
+
+	it("下書きは記事・SEO・公開manifest・いいねAPIに出力しない", async () => {
+		const slug = "anonymous-likes-with-workers-and-d1";
+		for (const pathname of [
+			"/",
+			"/sitemap.xml",
+			"/llms.txt",
+			"/post-slugs.json",
+		]) {
+			const response = await runtime.dispatchFetch(`${origin}${pathname}`);
+			expect(response.status).toBe(200);
+			expect(await response.text()).not.toContain(slug);
+		}
+		for (const pathname of [`/blog/${slug}/`, `/blog/${slug}/index.md`]) {
+			const response = await runtime.dispatchFetch(`${origin}${pathname}`);
+			expect(response.status).toBe(404);
+		}
+		for (const method of ["GET", "HEAD", "POST"]) {
+			const response = await runtime.dispatchFetch(
+				`${origin}/api/likes/${slug}`,
+				{
+					method,
+					headers: { Origin: origin },
+				},
+			);
+			expect(response.status).toBe(404);
+			expect(response.headers.get("Cache-Control")).toBe("no-store");
+		}
 	});
 
 	it("一覧と記事に発見用のメタデータを出力する", async () => {

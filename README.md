@@ -34,6 +34,8 @@ D1のSQLは `migrations/` に置きます。`db:migrate` は `cf d1 migrations a
 pnpm new:post <slug> "<title>"
 ```
 
+未公開の記事はfront matterに `draft: true` を指定します。ソースは残したまま、記事HTML・Markdown・一覧・sitemap・llms.txt・いいねAPIの公開記事manifestから除外されます。記事を公開するときは、内容の承認後にこの指定を外して手動デプロイします。
+
 ## 記事いいね
 
 記事ページの「いいね」は、Cloudflare Worker の `POST /api/likes/<slug>` が D1 のカウンターを1増やす機能です。ページ表示時は `GET /api/likes/<slug>` で現在の累積数を表示します。公開済み記事のslug以外は受け付けません。閲覧者のID、Cookie、IPアドレス、いいね履歴は保存しません。

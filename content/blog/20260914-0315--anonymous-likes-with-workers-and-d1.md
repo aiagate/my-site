@@ -2,6 +2,7 @@
 title: "Cloudflare WorkersとD1によるミニマルな匿名いいね機能の実装"
 description: "CMSや認証を導入せず、静的ブログにCloudflare WorkersとD1で匿名いいね機能を追加した設計と実装のまとめ。"
 createdAt: "2026-09-14T03:15:00.000Z"
+draft: true
 ---
 
 本ブログ（shimae.net）に、記事ごとの「いいね」機能を追加した。

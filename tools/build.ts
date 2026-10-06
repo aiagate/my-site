@@ -68,7 +68,7 @@ function loadPosts(): Post[] {
 		filesBySlug.set(post.slug, file);
 	}
 
-	return loadedPosts.map(({ post }) => post);
+	return loadedPosts.map(({ post }) => post).filter((post) => !post.draft);
 }
 
 function loadPost(file: string): Post {

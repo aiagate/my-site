@@ -57,6 +57,8 @@ CLI移行だけではPHP探索のWorker起動を減らせない。実装候補�
 
 ### 初回公開
 
+初回分離は現在の公開3記事（`hello`、`what-role-for-me`、`ai-ronpa-kaikan-driven-development`）を維持する。未公開の匿名いいね記事は `draft: true` としてソースを保存し、両ビルドとSEO出力から除外する。公開記事集合の一致チェックは維持し、この記事の公開を分離作業に含めない。
+
 1. 変更前に `cf workers deployments list --worker my-site` で100%配信中のversionと割合を控える。Custom Domains、Routes、workers.dev設定も読み取りで控える。D1変更は行わない。
 2. 品質確認済みの同じcommitから `pnpm build` で両出力を生成する。
 3. 初回は `node tools/check-public-manifest.ts` で既存Routesが空であることと、現在公開中の記事集合とcandidateが両hostで一致することを確認する。不一致なら記事の追加・削除を今回の分離と同時に行わず停止する。`pnpm deploy:api` でAPIと2 Routesを接続する。途中失敗時は既存 `my-site` を静的専用へ変えない。
