@@ -68,7 +68,7 @@ function loadPosts(): Post[] {
 		filesBySlug.set(post.slug, file);
 	}
 
-	return loadedPosts.map(({ post }) => post);
+	return loadedPosts.map(({ post }) => post).filter((post) => !post.draft);
 }
 
 function loadPost(file: string): Post {
@@ -199,6 +199,14 @@ function buildPostSlugs(posts: Post[]): void {
 	fs.writeFileSync(
 		path.join(OUTPUT_DIR, "post-slugs.json"),
 		`${JSON.stringify(posts.map((post) => post.slug))}\n`,
+	);
+
+	// Both uploads use the same published-post snapshot; the API gets no pages.
+	fs.rmSync("dist-api", { recursive: true, force: true });
+	fs.mkdirSync("dist-api", { recursive: true });
+	fs.copyFileSync(
+		path.join(OUTPUT_DIR, "post-slugs.json"),
+		"dist-api/post-slugs.json",
 	);
 }
 

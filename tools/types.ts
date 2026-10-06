@@ -20,6 +20,7 @@ export const postFilenameSchema = z
 export const postFrontMatterSchema = z.object({
 	title: z.string().min(1),
 	description: z.string().min(1),
+	draft: z.boolean().default(false),
 	createdAt: z
 		.string()
 		.datetime()
