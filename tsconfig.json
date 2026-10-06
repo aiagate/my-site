@@ -10,5 +10,11 @@
 		"skipLibCheck": true,
 		"types": ["@cloudflare/workers-types", "node"]
 	},
-	"include": ["src/**/*.ts", "tools/**/*.ts", "vitest.config.ts"]
+	"include": [
+		"src/**/*.ts",
+		"tools/**/*.ts",
+		"vitest.config.ts",
+		"cloudflare.config.ts",
+		"wrangler.config.ts"
+	]
 }

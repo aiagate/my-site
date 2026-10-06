@@ -114,3 +114,9 @@ Shimae の考えや技術的な知見を、無理なく継続して公開・蓄�
 | Decision | Why unresolved | Needed evidence | Owner | Latest responsible moment |
 |---|---|---|---|---|
 | 長期運用の具体的な月額・年額コスト上限 | 低コストを優先することは決定済みだが、現在は上限を定める必要性がない。 | 現行費用、代替案の見積もり、負担と期待効果。 | Site operator | 有料サービスの採用または現行費用の増加を判断する前。 |
+
+## 2026-10-05: Cloudflare CLIへの移行
+
+本人の追加依頼により、コマンドの入口を `cf` に移行する。`cloudflare.config.ts` をWorker設定の正本、`wrangler.config.ts` をビルド設定とし、既存の静的生成・D1・レート制限・Honoを維持する。新しいサービスは導入しない。`cf` はbetaのためプロジェクトでバージョンを固定する。ビルド実装とWorkers runtimeテストにはWrangler/Miniflareを引き続き使う。
+
+再検討条件は、betaの破壊的変更、ローカル検証の不成立、設定の二重管理、またはCLI移行が継続的な運用負担になること。不要なWorker起動の削減については `docs/worker-routing.md` の比較を踏まえ、配信構成の選択後に実装する。

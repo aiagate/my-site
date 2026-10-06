@@ -4,17 +4,17 @@
 	"private": true,
 	"packageManager": "pnpm@11.22.0",
 	"engines": {
-		"node": ">=22.0.0",
+		"node": ">=22.18.0",
 		"pnpm": ">=11.22.0"
 	},
 	"scripts": {
-		"build": "node tools/build.ts",
+		"build": "node tools/build.ts && cf build",
 		"new:post": "node tools/new-post.ts",
-		"db:create": "wrangler d1 create my-site-likes",
-		"db:migrate": "wrangler d1 migrations apply my-site-likes --remote",
-		"deploy": "wrangler deploy",
-		"dev": "wrangler dev",
-		"start": "wrangler dev",
+		"db:create": "cf d1 create --name my-site-likes",
+		"db:migrate": "cf d1 migrations apply 9f784723-b63b-4a28-b476-70014e5146fb --dir ./migrations",
+		"deploy": "cf deploy",
+		"dev": "cf dev",
+		"start": "cf dev",
 		"test": "pnpm build && vitest run",
 		"test:watch": "pnpm build && vitest",
 		"lint": "biome lint .",
@@ -35,11 +35,12 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.5.8",
 		"@cloudflare/vitest-plugin": "^1.0.0",
-		"@cloudflare/workers-types": "^5.20260811.1",
+		"@cloudflare/workers-types": "^5.20261004.1",
 		"@types/node": "^22.15.17",
 		"@types/sanitize-html": "^2.16.1",
+		"cf": "1.0.0-beta.12",
 		"typescript": "^5.8.3",
 		"vitest": "^4.1.11",
-		"wrangler": "^4.123.0"
+		"wrangler": "^4.147.0"
 	}
 }
