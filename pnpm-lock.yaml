@@ -51,12 +51,33 @@ importers:
       cf:
         specifier: 1.0.0-beta.12
         version: 1.0.0-beta.12(@types/node@22.20.1)
+      miniflare:
+        specifier: 5.20260820.0-alpha
+        version: 5.20260820.0-alpha
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
       vitest:
         specifier: ^4.1.11
         version: 4.1.11(@types/node@22.20.1)(vite@8.2.2(@types/node@22.20.1)(esbuild@0.28.1))
+      wrangler:
+        specifier: ^4.147.0
+        version: 4.147.0(@cloudflare/workers-types@5.20261004.1)(@types/node@22.20.1)
+
+  api:
+    devDependencies:
+      cf:
+        specifier: 1.0.0-beta.12
+        version: 1.0.0-beta.12(@types/node@22.20.1)
+      wrangler:
+        specifier: ^4.147.0
+        version: 4.147.0(@cloudflare/workers-types@5.20261004.1)(@types/node@22.20.1)
+
+  site:
+    devDependencies:
+      cf:
+        specifier: 1.0.0-beta.12
+        version: 1.0.0-beta.12(@types/node@22.20.1)
       wrangler:
         specifier: ^4.147.0
         version: 4.147.0(@cloudflare/workers-types@5.20261004.1)(@types/node@22.20.1)

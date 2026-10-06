@@ -23,6 +23,52 @@ function getLikeCount(slug: string) {
 }
 
 describe("記事いいね API", () => {
+	it.each(["https://shimae.net", "https://www.shimae.net"])(
+		"%s の同Origin POSTは受け付ける",
+		async (host) => {
+			const response = await exports.default.fetch(
+				new Request(`${host}/api/likes/hello`, {
+					method: "POST",
+					headers: { Origin: host },
+				}),
+			);
+			expect(response.status).toBe(200);
+			expect(await response.json()).toEqual({ count: 1 });
+		},
+	);
+
+	it("別の公開hostからの更新も拒否する", async () => {
+		const response = await exports.default.fetch(
+			new Request("https://shimae.net/api/likes/hello", {
+				method: "POST",
+				headers: { Origin: "https://www.shimae.net" },
+			}),
+		);
+		expect(response.status).toBe(403);
+		expect((await getLikeCount("hello")).status).toBe(200);
+		expect(await (await getLikeCount("hello")).json()).toEqual({ count: 0 });
+	});
+
+	it("API Workerの直通URLではマニフェストと静的ページを公開しない", async () => {
+		for (const pathname of ["/", "/post-slugs.json", "/blog/hello/"]) {
+			const response = await exports.default.fetch(
+				new Request(`${origin}${pathname}`),
+			);
+			expect(response.status).toBe(404);
+			expect(response.headers.get("Cache-Control")).toBe("no-store");
+			expect(await response.json()).toEqual({ error: "Not found" });
+		}
+	});
+
+	it("未知経路のHEADは404で本文を返さない", async () => {
+		const response = await exports.default.fetch(
+			new Request(`${origin}/api/likes/hello/extra`, { method: "HEAD" }),
+		);
+		expect(response.status).toBe(404);
+		expect(response.headers.get("Cache-Control")).toBe("no-store");
+		expect(await response.text()).toBe("");
+	});
+
 	it("連打ごとに累積数を増やす", async () => {
 		const first = await like("hello");
 		const second = await like("hello");

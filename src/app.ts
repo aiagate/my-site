@@ -67,6 +67,6 @@ app.all("/api/likes/:slug", (c) =>
 	json(c, { error: "Method not allowed" }, 405),
 );
 
-app.notFound((c) => c.env.ASSETS.fetch(c.req.raw));
+app.notFound((c) => json(c, { error: "Not found" }, 404));
 
 export { app };

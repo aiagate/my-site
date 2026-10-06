@@ -12,9 +12,9 @@
 	},
 	"include": [
 		"src/**/*.ts",
+		"api/**/*.ts",
 		"tools/**/*.ts",
 		"vitest.config.ts",
-		"cloudflare.config.ts",
-		"wrangler.config.ts"
+		"site/**/*.ts"
 	]
 }

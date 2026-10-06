@@ -8,13 +8,15 @@
 		"pnpm": ">=11.22.0"
 	},
 	"scripts": {
-		"build": "node tools/build.ts && cf build",
+		"build": "node tools/build.ts && cd site && cf build && cd ../api && cf build",
 		"new:post": "node tools/new-post.ts",
 		"db:create": "cf d1 create --name my-site-likes",
 		"db:migrate": "cf d1 migrations apply 9f784723-b63b-4a28-b476-70014e5146fb --dir ./migrations",
-		"deploy": "cf deploy",
-		"dev": "cf dev",
-		"start": "cf dev",
+		"deploy": "pnpm build && node tools/check-public-manifest.ts && pnpm deploy:api && node tools/smoke-api.ts && pnpm deploy:static",
+		"deploy:api": "cd api && cf deploy --prebuilt",
+		"deploy:static": "cd site && cf deploy --prebuilt",
+		"dev": "pnpm build && node tools/dev.ts",
+		"start": "pnpm dev",
 		"test": "pnpm build && vitest run",
 		"test:watch": "pnpm build && vitest",
 		"lint": "biome lint .",
@@ -39,6 +41,7 @@
 		"@types/node": "^22.15.17",
 		"@types/sanitize-html": "^2.16.1",
 		"cf": "1.0.0-beta.12",
+		"miniflare": "5.20260820.0-alpha",
 		"typescript": "^5.8.3",
 		"vitest": "^4.1.11",
 		"wrangler": "^4.147.0"
